@@ -261,7 +261,7 @@ else
     ghe_host=$(jq -r '.source.ghe_host // ""' <<< "$payload")
     org=$(jq -r '.source.org // ""' <<< "$payload")
     suffix=$(jq -r '.source.suffix // ""' <<< "$payload")
-    username="$BUILD_CREATED_BY$suffix"
+    username="$(echo $BUILD_CREATED_BY | cut -d'@' -f1)$suffix"
     is_debug_mode=$(jq -r '.params.debug // ""' <<< "$payload")
     total_number_of_users=$(jq -r '.source.users // ""' <<< "$payload" | wc -l)
     number_of_users=$(echo $(expr $total_number_of_users - 2))
