@@ -1,0 +1,47 @@
+name: webhook-trigger-trail
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - dev
+      - qa
+
+jobs:
+  pr_closed_action:
+    # Only run if PR was merged (not just closed without merging)
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get PR and branch details
+        run: |
+          echo "PR #${{ github.event.pull_request.number }} was merged"
+          echo "PR title: ${{ github.event.pull_request.title }}"
+          echo "Source branch: ${{ github.event.pull_request.head.ref }}"
+          echo "Target branch: ${{ github.event.pull_request.base.ref }}"
+
+      # Run different steps based on target branch
+      - name: Dev branch specific actions
+        if: github.event.pull_request.base.ref == 'dev'
+        run: |
+          curl --request POST https://ci.comcast.net/api/v1/teams/mc/pipelines/ecaf-ui/resources/ecaf-ui-aws-dev/check/webhook?webhook_token=46d44238-0b02-4086-a5d2-441d8728c6b9
+          curl --request POST https://ci.comcast.net/api/v1/teams/mc/pipelines/ecaf-ui/resources/ecaf-ui-aws-branch-for-testing-on-dev-env/check/webhook?webhook_token=46d44238-0b02-4086-a5d2-441d8728c6b9
+          curl --request POST https://ci.comcast.net/api/v1/teams/mc/pipelines/ecaf-ui/resources/ecaf-infra/check/webhook?webhook_token=46d44238-0b02-4086-a5d2-441d8728c6b9
+          curl --request POST https://ci.comcast.net/api/v1/teams/mc/pipelines/ecaf-api/resources/ecaf-api.dev/check/webhook?webhook_token=46d44238-0b02-4086-a5d2-441d8728c6b9
+          curl --request POST https://ci.comcast.net/api/v1/teams/mc/pipelines/ecaf-api/resources/ecaf-api.branch-for-testing-on-dev-env/check/webhook?webhook_token=46d44238-0b02-4086-a5d2-441d8728c6b9
+          curl --request POST https://ci.comcast.net/api/v1/teams/mc/pipelines/ecaf-api/resources/ecaf-infra/check/webhook?webhook_token=46d44238-0b02-4086-a5d2-441d8728c6b9
+          curl --request POST https://ci.comcast.net/api/v1/teams/mc/pipelines/ecaf-sls/resources/ecaf-sls.dev/check/webhook?webhook_token=46d44238-0b02-4086-a5d2-441d8728c6b9
+          curl --request POST https://ci.comcast.net/api/v1/teams/mc/pipelines/ecaf-etl/resources/etl.dev/check/webhook?webhook_token=46d44238-0b02-4086-a5d2-441d8728c6b9
+                    
+      - name: QA branch specific actions
+        if: github.event.pull_request.base.ref == 'qa'
+        run: |
+         curl --request POST https://ci.comcast.net/api/v1/teams/mc/pipelines/ecaf-ui/resources/ecaf-ui-aws-qa/check/webhook?webhook_token=46d44238-0b02-4086-a5d2-441d8728c6b9
+         curl --request POST https://ci.comcast.net/api/v1/teams/mc/pipelines/ecaf-api/resources/ecaf-api.staging/check/webhook?webhook_token=46d44238-0b02-4086-a5d2-441d8728c6b9
+         curl --request POST https://ci.comcast.net/api/v1/teams/mc/pipelines/ecaf-sls/resources/ecaf-sls.staging/check/webhook?webhook_token=46d44238-0b02-4086-a5d2-441d8728c6b9
+         curl --request POST https://ci.comcast.net/api/v1/teams/mc/pipelines/ecaf-etl/resources/etl.staging/check/webhook?webhook_token=46d44238-0b02-4086-a5d2-441d8728c6b9
+         curl --request POST https://ci.comcast.net/api/v1/teams/mc/pipelines/ecaf-kafka-consumer/resources/topnet.staging/check/webhook?webhook_token=46d44238-0b02-4086-a5d2-441d8728c6b9
