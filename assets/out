@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -u
+set -u 
 
 export GH_DEBUG=0
 
